@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<div class='container-fluid'>
+ <div class='row'>
+  <div class='col-md-8 col-md-push-2 buffer-top-md'>
+   <h2>Edit Network</h2>
+
+   <form class='modal-form form-horizontal' id='wifi-form' action='/edit/{{ profile.id }}/confirm' method='POST'>
+    <table class='table'>
+     <tr>
+      <th>Name</th>
+      <th>Password</th>
+      <th>Validity</th>
+     </tr>
+
+     <tr>
+      <td class='form-group'>
+       <input id='ssid' name='ssid' type='text' class='form-control' placeholder='Name' value='{{ profile.ssid }}'>
+      </td>
+      <td class='control-group'>
+       <input id='psk' name='psk' type='text' class='form-control' placeholder='Password' value='{{ profile.psk }}'>
+      </td>
+      <td class='form-group'>
+       <div class='input-daterange input-group' id='datepicker'>
+        <input type='text' class='form-control' name='start' id='start' value='{{ profile.start.strftime('%Y-%m-%d') }}' />
+        <span class='input-group-addon'>to</span>
+        <input type='text' class='form-control' name='stop' id='stop' value='{{ profile.start.strftime('%Y-%m-%d') }}'/>
+       </div>
+      </td>
+     </tr>
+
+     <tr>
+      <td colspan='4'>
+       <div class='text-right'>
+        <a class='btn btn-warning' href='/'>Cancel</a>
+        <button type='submit' class='btn btn-success submit-btn'>Save Changes</button>
+       </div>
+      </td>
+     </tr>
+    </table>
+   </form>
+
+  </div>
+ </div>
+</div>
+
+{% endblock %}

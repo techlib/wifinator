@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+ <div class="row">
+  <div class="col-md-6 col-md-push-6 buffer-top-md">
+   <h2>Profiles</h2>
+   <table class="table">
+    <tr>
+     <th>Name</th>
+     <th>Password</th>
+     <th>First Day</th>
+     <th>Last Day</th>
+     {% if has_privilege('admin') %}
+     <th></th>
+     {% endif %}
+    </tr>
+
+    {% for profile in profiles %}
+    <tr>
+     <td>{{ profile.ssid }}</td>
+     <td>{{ profile.psk }}</td>
+     <td>{{ profile.start.strftime('%Y-%m-%d') }}</td>
+     <td>{{ profile.stop.strftime('%Y-%m-%d') }}</td>
+     {% if has_privilege('admin') %}
+     <td>
+      <a class="btn btn-primary" title="Edit" href="/edit/{{ profile.id }}">
+       <i class="glyphicon glyphicon-edit"></i> Edit
+      </a>
+      <a class="btn btn-danger" href="/delete/{{ profile.id }}" title='Delete {{profile.ssid}}?' data-toggle='confirmation' data-placement="bottom">
+       <i class="glyphicon glyphicon-trash"></i> Delete
+      </a>
+     </td>
+     {% endif %}
+    </tr>
+    {% endfor %}
+
+    {% if has_privilege('admin') %}
+    <tr>
+     <td colspan="4"></td>
+     <td>
+      <a class="btn btn-success" href="#addNetworkDialog" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Add Network</a>
+     </td>
+    </tr>
+    {% endif %}
+   </table>
+  </div>
+
+  <div class="col-md-6 col-md-pull-6 buffer-top-md">
+   <h2>Recent Changes</h2>
+   <table class="table">
+    <tr>
+     <th>When</th>
+     <th>Who</th>
+     <th>What</th>
+    </tr>
+
+    {% for change in changes %}
+    <tr>
+     <td><span class="timeago" title="{{ change['time'].strftime('%Y-%m-%dT%H:%M:%S') }}">{{ change['time'].strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+     <td>{{ change['user'] }}</td>
+     <td>{{ change['desc']|safe }}</td>
+    </tr>
+    {% endfor %}
+   </table>
+  </div>
+ </div>
+</div>
+
+{% if has_privilege('admin') %}
+<div id='addNetworkDialog' class='modal fade' tabindex='-1' role='dialog' aria-labelledby='addNetworkDialogLabel'>
+ <div class='modal-dialog'>
+  <div class='modal-content'>
+   <form class='form-horizontal' action='/create' id='wifi-form' method='POST'>
+    <div class='modal-header'>
+     <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>×</button>
+     <h3 id='addNetworkDialogLabel'>New Network</h3>
+    </div>
+
+    <div class='modal-body'>
+     <div class='form-group'>
+      <label class='control-label col-sm-2' for='ssid'>Name</label>
+      <div class='col-sm-10'>
+       <input name='ssid' type='text' id='ssid' class='form-control' placeholder='Name'>
+      </div>
+     </div>
+
+     <div class='form-group'>
+      <label class='control-label col-sm-2' for='psk'>Password</label>
+      <div class='col-sm-10'>
+       <input name='psk' type='text' id='psk' class='form-control' placeholder='Password'>
+      </div>
+     </div>
+
+     <div class='form-group'>
+      <label class='control-label col-sm-2' for='start'>Validity</label>
+      <div class='col-sm-10'>
+       <div class='input-daterange input-group' id='datepicker'>
+        <input type='text' class='form-control' name='start' id='start' value='{{ today }}' />
+        <span class='input-group-addon'>to</span>
+        <input type='text' class='form-control' name='stop' id='stop' value='{{ today }}'/>
+       </div>
+      </div>
+     </div>
+    </div>
+
+    <div class='modal-footer'>
+     <a class='btn btn-warning' data-dismiss='modal' aria-hidden='true'>Cancel</a>
+     <button type='submit' class='btn btn-success submit-btn'>Create Network</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+{% endif %}
+
+{% endblock %}

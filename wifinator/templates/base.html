@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html lang="en-us" class="ie9"><![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en-us">
+ <!--<![endif]-->
+ <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/vendor/patternfly/css/patternfly.min.css?v=3.0.0">
+  <link rel="stylesheet" href="/static/vendor/patternfly/css/patternfly-additions.min.css?v=3.0.0">
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker3.min.css" crossorigin="anonymous" integrity="sha384-pTelTQUzjwvqMFfX0DI8Pi9cXXUTsvSZcgNEghBc6kS9r3B77rBqJVO6zxP86q1E">
+  <script src="//code.jquery.com/jquery-2.1.4.min.js" crossorigin="anonymous" integrity="sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" crossorigin="anonymous" integrity="sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-confirmation/1.0.5/bootstrap-confirmation.min.js" crossorigin="anonymous" integrity="sha384-vMMciU9KnFBubM1yw+Q+6f68+ZHeeD0LPvydPm6xdw75vMiYRB03L7+4K5gGoh5w"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js" crossorigin="anonymous" integrity="sha384-vSdYrU7lSLRoeJP8+brQ26ad7tTrch3Rbp7wOYQ9U+9+SpJO5le1+vWHKzK1w58d"></script>
+  <script src="/static/vendor/patternfly/js/patternfly.min.js?v=3.0.0"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.5.2/jquery.timeago.min.js" crossorigin="anonymous" integrity="sha384-MPCI/e9mKGaS5YksJEmlTIIonpSyYnitbS7p4y7v5WAJ3VPkNcRbnFzu4wWIhf7Z"></script>
+  <script src="/static/vendor/nod.js"></script>
+  <script src="/static/js/validations.js"></script>
+  <title>{% block title %}{% endblock %} - WiFinátor</title>
+  {% block head %}
+  {% endblock %}
+ </head>
+ <body>
+  <nav class="navbar navbar-utility navbar-pf" role="navigation">
+   <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse-1">
+     <span class="sr-only">Toggle navigation</span>
+     <span class="icon-bar"></span>
+     <span class="icon-bar"></span>
+     <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="/"><b>NTK</b> WiFinátor</a>
+   </div>
+   <div class="collapse navbar-collapse navbar-collapse-1">
+    <ul class="nav navbar-nav navbar-utility">
+     {% block navigation %}
+     {% endblock %}
+    </ul>
+   </div>
+  </nav>
+
+  <div class="toast-pf-max-width toast-pf-top-right">
+   {% for category, message in get_flashed_messages(with_categories=true) %}
+   <div class="toast-pf alert {{category|to_alert}} alert-dismissable pull-right">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+     <span class="pficon pficon-close"></span>
+    </button>
+    <span class="pficon {{category|to_icon}}"></span> {{message}}
+   </div>
+   {% endfor %}
+  </div>
+
+  {% block content %}
+  {% endblock %}
+  <script>
+   $(function() {
+     $('.timeago').timeago();
+
+     $('[data-toggle="confirmation"]').confirmation({
+       onConfirm: function(e, el) {
+         window.location.replace(el[0].href);
+       }
+     });
+
+     $('.input-daterange').datepicker({
+       format: "yyyy-mm-dd",
+       weekStart: 1,
+       todayBtn: "linked",
+       clearBtn: true,
+       orientation: "bottom auto",
+       autoclose: true,
+       todayHighlight: true
+     });
+    });
+  </script>
+ </body>
+</html>
