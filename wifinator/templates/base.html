@@ -33,12 +33,15 @@
     </button>
     <a class="navbar-brand" href="/"><b>NTK</b> WiFinátor</a>
    </div>
+
+   {% block navigation %}
    <div class="collapse navbar-collapse navbar-collapse-1">
     <ul class="nav navbar-nav navbar-utility">
-     {% block navigation %}
+     {% block navlinks %}
      {% endblock %}
     </ul>
    </div>
+   {% endblock %}
   </nav>
 
   <div class="toast-pf-max-width toast-pf-top-right">
