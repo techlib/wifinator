@@ -1,4 +1,4 @@
-#!/usr/bin/python3.4 -tt
+#!/usr/bin/python3 -tt
 
 # Twisted hosts our website and helps with async tasks.
 # The application threads are structured in the following way:
