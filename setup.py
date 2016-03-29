@@ -21,7 +21,7 @@ setup(
     classifiers = [
         'License :: OSI Approved :: MIT License',
     ],
-    scripts = ['wifinator-daemon']
+    scripts = ['wifinator-daemon', 'wifinator-stats']
 )
 
 

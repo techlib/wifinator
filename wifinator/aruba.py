@@ -48,7 +48,7 @@ class Aruba(object):
         if r.find('t') is None:
             raise ArubaError('Response does not contain a table')
 
-        return [[c.text for c in row] for row in r.find('t')[1:]]
+        return [[c.text.strip() for c in row] for row in r.find('t')[1:]]
 
     def request_dict(self, command):
         return {row[0]: row[1] for row in self.request_table(command)}
@@ -69,7 +69,7 @@ class Aruba(object):
             raise ArubaError('Login failed')
 
     def list_profiles(self):
-        """Returns dict of service profiles with SSID and Beacon settings."""
+        """List service profiles with SSID and Beacon settings."""
 
         profiles = {}
 
@@ -81,6 +81,38 @@ class Aruba(object):
             }
 
         return profiles
+
+    def list_stations(self):
+        """List client stations with MAC addresses and more."""
+
+        stations = {}
+
+        r = self.request_table('show station-table')
+        for mac, name, role, age, auth, ap, essid, phy, remote, profile in r:
+            stations[mac] = {
+                'mac': mac,
+                'name': name,
+                'role': role,
+                'age': age,
+                'auth': auth,
+                'ap': ap,
+                'essid': essid,
+                'phy': phy,
+                'remote': remote,
+                'profile': profile,
+            }
+
+        return stations
+
+    def essid_stats(self):
+        stats = {}
+
+        for station in self.list_stations().values():
+            essid = station['essid']
+            stats.setdefault(essid, 0)
+            stats[essid] += 1
+
+        return stats
 
     def edit_profile(self, profile, ssid, psk, active):
         """Adjust service profile. PSK is in plain text."""
