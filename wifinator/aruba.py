@@ -48,7 +48,10 @@ class Aruba(object):
         if r.find('t') is None:
             raise ArubaError('Response does not contain a table')
 
-        return {r[0].text: r[1].text for r in r.find('t')[1:]}
+        return [[c.text for c in row] for row in r.find('t')[1:]]
+
+    def request_dict(self, command):
+        return {row[0]: row[1] for row in self.request_table(command)}
 
     def login(self):
         if XML(self.request('show roleinfo')).find('data'):
@@ -70,8 +73,8 @@ class Aruba(object):
 
         profiles = {}
 
-        for name in self.request_table('show wlan ssid-profile'):
-            detail = self.request_table('show wlan ssid-profile ' + name)
+        for name in self.request_dict('show wlan ssid-profile'):
+            detail = self.request_dict('show wlan ssid-profile ' + name)
             profiles[name] = {
                     'ssid': detail['ESSID'],
                     'active': detail['SSID enable'] == 'Enabled',
