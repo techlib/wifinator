@@ -120,6 +120,11 @@ if __name__ == '__main__':
             config_path = v
 
     # Load the configuration from file.
+    if action not in (do_help, do_version):
+        config = ConfigParser()
+        config.read(config_path)
+
+    # Load the configuration from file.
     config = ConfigParser()
     config.read(config_path)
 
