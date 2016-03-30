@@ -48,7 +48,8 @@ class Aruba(object):
         if r.find('t') is None:
             raise ArubaError('Response does not contain a table')
 
-        return [[c.text.strip() for c in row] for row in r.find('t')[1:]]
+        return [[(c.text.strip() if c.text is not None else '') for c in row] \
+                for row in r.find('t')[1:]]
 
     def request_dict(self, command):
         return {row[0]: row[1] for row in self.request_table(command)}
