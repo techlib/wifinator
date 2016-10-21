@@ -1,7 +1,8 @@
 <style>
-body { font: 2em Fontin, serif }
 
-@page { size: A4 landscape; margin: 1cm; margin-top:2cm; }
+body { font: 2em Fontin, sans-serif }
+
+@page { size: A3 landscape; margin: 1cm; }
 @media print {
     nav { display: none }
 }
@@ -10,8 +11,12 @@ img {
     height: 500px;
     margin-top: 2cm;
 }
+h1 {
+    font-size: 260%;
+}
 h2 {
-    color: #555
+    color: #555;
+    margin-bottom: -50px;
 }
 .desc {
 width: 50%; 
@@ -19,16 +24,39 @@ float: left;
 margin-top: 2cm;
 margin-left: 1%
 }
+.logos #ntk {
+    width: 504px;
+    height: 324px;
+    margin-top: -1cm;
+}
+.logos #wifi {
+    width: 304px;
+    height: 195px;
+    position: absolute;
+    right: 100px;
+    top: 0;
+}
+.qrcode {
+width: 48%; 
+float: left;
+}
+.qrcode img {
+    float: right;
+}
 </style>
 
 <body>
+<div class="logos">
+    <img id="ntk" src="/static/img/ntk-logo.png">
+    <img id="wifi" src="/static/img/wifi-logo.svg">
+</div>
 <div class="desc">
-            <h2>WiFi</h2>
+            <h2>SSID</h2>
             <h1>{{profile.ssid}}</h1>
             <h2>Password</h2>
             <h1>{{profile.psk}}</h1>
 </div>
-<div style="width: 48%; float: left">
+<div  class="qrcode">
     <img src="{{ qrcode(qr_string) }}">
 </div>
 </body>
