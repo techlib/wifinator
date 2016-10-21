@@ -4,3 +4,5 @@ Flask
 SQLAlchemy
 SQLSoup
 requests
+Flask-QRcode-1.0
+Flask-WeasyPrint

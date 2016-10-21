@@ -9,6 +9,8 @@ from werkzeug.exceptions import *
 from wifinator.site.util import *
 from functools import wraps
 
+from flask.ext.qrcode import QRcode
+from flask_weasyprint import HTML, render_pdf
 
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,6 +25,9 @@ def make_site(db, manager, access_model, debug=False):
     app = flask.Flask('.'.join(__name__.split('.')[:-1]))
     app.secret_key = os.urandom(16)
     app.debug = debug
+
+    # Init QRCode plugin
+    QRcode(app)
 
     @app.template_filter('to_alert')
     def category_to_alert(category):
@@ -187,6 +192,19 @@ def make_site(db, manager, access_model, debug=False):
             return flask.redirect('/')
 
         return flask.render_template('edit.html', **locals())
+
+    @app.route('/printable/<int:pid>')
+    @authorized_only(privilege='admin')
+    def printable(pid):
+        profile = manager.db.profile.get(pid)
+        qr_string = "WIFI:S:%s;T:WPA;P:%s" % (profile.ssid, profile.psk)
+        if profile is None:
+            flask.flash('Network disappeared in the meantime.', 'warning')
+            return flask.redirect('/')
+
+        html = flask.render_template('printable.html', **locals())
+        return render_pdf(HTML(string=html))
+
 
     @app.route('/edit/<int:pid>/confirm', methods=['POST'])
     @authorized_only(privilege='admin')
