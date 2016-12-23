@@ -9,7 +9,7 @@ from werkzeug.exceptions import *
 from wifinator.site.util import *
 from functools import wraps
 
-from flask.ext.qrcode import QRcode
+from flask_qrcode import QRcode
 from flask_weasyprint import HTML, render_pdf
 
 from sqlalchemy import desc
