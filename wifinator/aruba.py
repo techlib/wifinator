@@ -115,6 +115,16 @@ class Aruba(object):
 
         return stats
 
+    def ap_stats(self):
+        stats = {}
+
+        for station in self.list_stations().values():
+            ap = station['ap']
+            stats.setdefault(ap, 0)
+            stats[ap] += 1
+
+        return stats
+
     def edit_profile(self, profile, ssid, psk, active):
         """Adjust service profile. PSK is in plain text."""
 
