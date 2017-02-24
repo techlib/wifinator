@@ -102,6 +102,18 @@ ALTER SEQUENCE audit_id_seq OWNED BY audit.id;
 
 
 --
+-- Name: location; Type: TABLE; Schema: public; Owner: wifi; Tablespace: 
+--
+
+CREATE TABLE location (
+    ap macaddr NOT NULL,
+    location character varying(50)
+);
+
+
+ALTER TABLE public.location OWNER TO wifi;
+
+--
 -- Name: profile; Type: TABLE; Schema: public; Owner: wifi; Tablespace: 
 --
 
@@ -161,6 +173,14 @@ ALTER TABLE ONLY profile ALTER COLUMN id SET DEFAULT nextval('profile_id_seq'::r
 
 ALTER TABLE ONLY audit
     ADD CONSTRAINT audit_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: location_pkey; Type: CONSTRAINT; Schema: public; Owner: wifi; Tablespace: 
+--
+
+ALTER TABLE ONLY location
+    ADD CONSTRAINT location_pkey PRIMARY KEY (ap);
 
 
 --

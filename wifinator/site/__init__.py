@@ -348,6 +348,21 @@ def make_site(db, manager, access_model, debug=False):
         manager.schedule_sync()
         return flask.redirect('/')
 
+    @app.route('/stations', methods=['GET'])
+    def stations():
+        aps = {}
+        for item in manager.db.location.all():
+            aps[item.ap] = item.location
+
+        stations = manager.aruba.list_stations()
+        for key in stations:
+            stations[key]['location'] = aps.get(stations[key]['ap'])
+
+        counts = {}
+        for key, value in stations.items():
+            counts[value['location']] = counts.get(value['location'], 0) + 1
+
+        return flask.jsonify(counts)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
