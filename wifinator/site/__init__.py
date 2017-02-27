@@ -356,7 +356,7 @@ def make_site(db, manager, access_model, debug=False):
 
         stations = manager.aruba.list_stations()
         for key in stations:
-            stations[key]['location'] = aps.get(stations[key]['ap'])
+            stations[key]['location'] = aps.get(stations[key]['ap'], 'Unknown')
 
         counts = {}
         for key, value in stations.items():
