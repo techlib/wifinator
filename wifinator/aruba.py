@@ -37,7 +37,7 @@ class Aruba(object):
         s = self.session.cookies.get('SESSION', '')
         p = '{0}@@{1}&UIDARUBA={2}'.format(command, int(time()), s)
         r = self.session.get(self.command_url, verify=False, params=p)
-        return r.text
+        return r.text.encode('utf8', 'xmlcharrefreplace')
 
     def request_table(self, command):
         try:
