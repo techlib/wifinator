@@ -10,8 +10,9 @@ import click
 from configparser import ConfigParser
 from collections import OrderedDict
 
-# CSV writer for output formatting.
+# Output formatting libraries.
 from csv import writer, DictWriter
+from tabulate import tabulate
 
 # For affiliation rule parsing.
 from fnmatch import fnmatch
@@ -84,44 +85,48 @@ def cli(ctx, config):
     # Pass the our model onto the sub-commands.
     ctx.obj = model
 
-@cli.command('essid-stats')
-@pass_model
-def essid_stats(model):
-    """
-    Output CSV-formatted ESSID user counts.
-    """
-
-    csv = writer(sys.stdout)
-
-    csv.writerow(['count', 'essid'])
-    for essid, count in model.aruba.essid_stats().items():
-        csv.writerow([count, essid])
-
 @cli.command('stations')
+@click.option('--csv', '-C', is_flag=True, help='Format output as CSV.')
 @pass_model
-def stations(model):
+def stations(model, csv=False):
     """
-    Output full CSV-formatted station listing.
+    Full station listing
     """
 
-    csv = DictWriter(sys.stdout, fieldnames=[
-        'mac', 'name', 'role', 'age', 'auth', 'ap',
-        'essid', 'phy', 'remote', 'profile',
-    ])
+    headers = {
+        'mac': 'MAC',
+        'name': 'Name',
+        'role': 'Role',
+        'age': 'Age',
+        'auth': 'Auth',
+        'ap': 'AP',
+        'essid': 'ESSID',
+        'phy': 'Phy',
+        'remote': 'Remote',
+        'profile': 'Profile',
+    }
 
-    csv.writeheader()
-    for station in model.aruba.list_stations().values():
-        csv.writerow(station)
+    rows = list(model.aruba.list_stations().values())
+    print_table(headers, rows, csv)
 
-@cli.command('user-domains')
+@cli.command('essid-stats')
+@click.option('--csv', '-C', is_flag=True, help='Format output as CSV.')
 @pass_model
-def user_domains(model):
+def essid_stats(model, csv=False):
     """
-    Output CSV-formatted statistics of user domains.
+    ESSID user counts
     """
 
-    csv = writer(sys.stdout)
-    csv.writerow(['count', 'organization'])
+    rows = model.aruba.essid_stats().items()
+    print_table(('ESSID', 'Count'), rows, csv)
+
+@cli.command('org-users')
+@click.option('--csv', '-C', is_flag=True, help='Format output as CSV.')
+@pass_model
+def user_domains(model, csv=False):
+    """
+    Organization user counts
+    """
 
     orgs = {}
 
@@ -130,8 +135,28 @@ def user_domains(model):
         orgs.setdefault(org, 0)
         orgs[org] += 1
 
-    for org, count in sorted(orgs.items()):
-        csv.writerow([count, org])
+    print_table(('Organization', 'Count'), orgs.items(), csv)
+
+def print_table(headers, rows, csv=False):
+    if csv:
+        if isinstance(headers, dict):
+            w = DictWriter(sys.stdout, dialect='unix',
+                           fieldnames=[h.lower() for h in headers])
+
+            w.writeheader()
+
+            for row in rows:
+                w.writerow({k.lower(): v for k, v in row.items()})
+
+        else:
+            w = writer(sys.stdout, dialect='unix')
+            w.writerow([h.lower() for h in headers])
+
+            for row in rows:
+                w.writerow(row)
+
+    else:
+        print(tabulate(rows, headers))
 
 
 if __name__ == '__main__':

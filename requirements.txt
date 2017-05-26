@@ -7,3 +7,4 @@ requests
 Flask-QRcode
 Flask-WeasyPrint
 click
+tabulate
