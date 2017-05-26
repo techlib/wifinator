@@ -84,6 +84,8 @@ if __name__ == '__main__':
     if action not in (do_help, do_version):
         config = ConfigParser()
         config.read(config_path)
+    else:
+        config = None
 
     # Perform the selected action.
     action(config=config)
