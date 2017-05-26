@@ -6,3 +6,4 @@ SQLSoup
 requests
 Flask-QRcode
 Flask-WeasyPrint
+click

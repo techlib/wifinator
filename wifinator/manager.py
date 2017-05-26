@@ -10,12 +10,10 @@ from twisted.python import log
 from wifinator.aruba import Aruba, ArubaError
 
 class Manager(object):
-    def __init__(self, db, aruba_config):
+    def __init__(self, db, aruba, profile_prefix):
         self.db = db
-        self.aruba = Aruba(aruba_config['address'],
-                           aruba_config['username'],
-                           aruba_config['password'])
-        self.profile_prefix = aruba_config['profile-prefix']
+        self.aruba = aruba
+        self.profile_prefix = profile_prefix
 
     def start(self):
         """Starts periodic operations."""
