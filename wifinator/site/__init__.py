@@ -348,21 +348,42 @@ def make_site(db, manager, access_model, debug=False):
         manager.schedule_sync()
         return flask.redirect('/')
 
-    @app.route('/stations', methods=['GET'])
-    def stations():
-        aps = {}
+    @app.route('/zones', methods=['GET'])
+    def zones():
+        # Determine what ESSIDs to exclude from the counts.
+        exclude = flask.request.args.get('exclude', '')
+        exclude = re.split(r'\s+', exclude.strip())
+
+        zones = {}
+        locations = {}
+
+        # Cache AP locations in memory.
         for item in manager.db.location.all():
-            aps[item.ap] = item.location
+            locations[item.ap] = item.location
+            zones.setdefault(item.location or 'Unknown', 0)
 
+        # Get information about all connected clients.
         stations = manager.aruba.list_stations()
-        for key in stations:
-            stations[key]['location'] = aps.get(stations[key]['ap'], 'Unknown')
 
-        counts = {}
-        for key, value in stations.items():
-            counts[value['location']] = counts.get(value['location'], 0) + 1
+        # Calculate ratio of users per wireless device.
+        # Many users connect from multiple devices with the same credentials.
+        wifi_count = len(stations)
+        user_count = len(set(s['name'] for s in stations.values()))
+        ratio = user_count / wifi_count
 
-        return flask.jsonify(counts)
+        # Split devices among the zones.
+        for station in stations.values():
+            if station['essid'] in exclude:
+                continue
+
+            location = locations.get(station['ap'], 'Unknown')
+            zones[location] += 1
+
+        # Convert devices counts into rounded user counts.
+        for zone in list(zones):
+            zones[zone] = round(zones[zone] * ratio)
+
+        return flask.jsonify(zones)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
