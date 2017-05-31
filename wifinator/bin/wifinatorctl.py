@@ -153,11 +153,11 @@ def stations(model, csv=False):
 @pass_model
 def essid_stats(model, csv=False):
     """
-    ESSID user counts
+    ESSID device counts
     """
 
     rows = model.aruba.essid_stats().items()
-    print_table(('ESSID', 'Count'), rows, csv)
+    print_table(('ESSID', 'Count'), sorted(rows), csv)
 
 @cli.command('org-users')
 @click.option('--csv', '-C', is_flag=True, help='Format output as CSV.')
