@@ -93,18 +93,18 @@ def stations(model, csv=False):
     Full station listing
     """
 
-    headers = {
-        'mac': 'MAC',
-        'name': 'Name',
-        'role': 'Role',
-        'age': 'Age',
-        'auth': 'Auth',
-        'ap': 'AP',
-        'essid': 'ESSID',
-        'phy': 'Phy',
-        'remote': 'Remote',
-        'profile': 'Profile',
-    }
+    headers = OrderedDict([
+        ('mac', 'MAC'),
+        ('name', 'Name'),
+        ('role', 'Role'),
+        ('age', 'Age'),
+        ('auth', 'Auth'),
+        ('ap', 'AP'),
+        ('essid', 'ESSID'),
+        ('phy', 'Phy'),
+        ('remote', 'Remote'),
+        ('profile', 'Profile'),
+    ])
 
     rows = list(model.aruba.list_stations().values())
     print_table(headers, rows, csv)
@@ -138,6 +138,9 @@ def user_domains(model, csv=False):
     print_table(('Organization', 'Count'), orgs.items(), csv)
 
 def print_table(headers, rows, csv=False):
+    if isinstance(headers, dict):
+        rows = reorder_rows_by_headers(headers, rows)
+
     if csv:
         if isinstance(headers, dict):
             w = DictWriter(sys.stdout, dialect='unix',
@@ -157,6 +160,19 @@ def print_table(headers, rows, csv=False):
 
     else:
         print(tabulate(rows, headers))
+
+def reorder_rows_by_headers(headers, rows):
+    new_rows = []
+
+    for row in rows:
+        new_row = OrderedDict()
+
+        for header in headers:
+            new_row[header] = row[header]
+
+        new_rows.append(new_row)
+
+    return new_rows
 
 
 if __name__ == '__main__':
