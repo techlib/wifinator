@@ -80,19 +80,22 @@ class Model:
             if attr is not None and len(attr) > 0:
                 return attr[0]
 
-    def get_affiliation(self, name):
+    def get_affiliation(self, name, essid):
         if '@' in name:
             user, domain = name.split('@', 1)
         else:
             domain = self.ldap_search(name)
 
-            if domain is None:
-                return 'Local'
-
         for org, rules in self.affiliation.items():
             for rule in rules:
-                if fnmatch(domain, rule):
+                if domain is not None and fnmatch(domain, rule):
                     return org
+
+                if fnmatch(essid, rule):
+                    return org
+
+        if domain is None:
+            return 'Local'
 
         return 'Other'
 
@@ -176,13 +179,22 @@ def user_domains(model, csv=False, ldap=False):
         model.enable_ldap()
 
     orgs = {}
+    seen = set()
 
     for station in model.aruba.list_stations().values():
-        org = model.get_affiliation(station['name'])
+        # Make sure we do not count the same user multiple times.
+        # Yes, they can have multiple devices.
+
+        if station['name'] in seen:
+            continue
+
+        seen.add(station['name'])
+
+        org = model.get_affiliation(station['name'], station['essid'])
         orgs.setdefault(org, 0)
         orgs[org] += 1
 
-    print_table(('Organization', 'Count'), orgs.items(), csv)
+    print_table(('Organization', 'Count'), sorted(orgs.items()), csv)
 
 def print_table(headers, rows, csv=False):
     if isinstance(headers, dict):
