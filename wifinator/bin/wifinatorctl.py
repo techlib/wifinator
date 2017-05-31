@@ -17,6 +17,8 @@ from tabulate import tabulate
 # For affiliation rule parsing.
 from fnmatch import fnmatch
 
+from ldap3 import Server, Connection, ALL
+
 # Import the Aruba driver.
 from wifinator.aruba import Aruba
 
@@ -30,10 +32,16 @@ class Model:
         ini = ConfigParser()
         ini.read(config)
 
+        # Save the configuration for later.
+        self.ini = ini
+
         # Read WiFi controller options.
         aruba_address = ini.get('aruba', 'address')
         aruba_username = ini.get('aruba', 'username')
         aruba_password = ini.get('aruba', 'password')
+
+        # No LDAP connection by default.
+        self.ldap = None
 
         # Prepare the WiFi controller client.
         self.aruba = Aruba(aruba_address, aruba_username, aruba_password)
@@ -44,11 +52,42 @@ class Model:
         for org, rules in ini.items('affiliation'):
             self.affiliation[org] = re.split(r'\s+', rules)
 
-    def get_affiliation(self, name):
-        if '@' not in name:
-            return 'Local'
+    def enable_ldap(self):
+        if self.ldap is not None:
+            return
 
-        user, domain = name.split('@', 1)
+        ldap_host = self.ini.get('ldap', 'host')
+        ldap_bind = self.ini.get('ldap', 'bind')
+        ldap_pass = self.ini.get('ldap', 'pass')
+
+        self.ldap_base = self.ini.get('ldap', 'base')
+        self.ldap_filter = self.ini.get('ldap', 'filter')
+        self.ldap_attribute = self.ini.get('ldap', 'attribute')
+
+        server = Server(ldap_host, get_info=ALL)
+        self.ldap = Connection(server, ldap_bind, ldap_pass, auto_bind=True)
+
+    def ldap_search(self, name):
+        if self.ldap is None:
+            return
+
+        self.ldap.search(self.ldap_base, self.ldap_filter.format(name=name),
+                         attributes=[self.ldap_attribute])
+
+        if len(self.ldap.entries) > 0:
+            attr = getattr(self.ldap.entries[0], self.ldap_attribute)
+
+            if attr is not None and len(attr) > 0:
+                return attr[0]
+
+    def get_affiliation(self, name):
+        if '@' in name:
+            user, domain = name.split('@', 1)
+        else:
+            domain = self.ldap_search(name)
+
+            if domain is None:
+                return 'Local'
 
         for org, rules in self.affiliation.items():
             for rule in rules:
@@ -122,11 +161,19 @@ def essid_stats(model, csv=False):
 
 @cli.command('org-users')
 @click.option('--csv', '-C', is_flag=True, help='Format output as CSV.')
+@click.option('--ldap', '-l', is_flag=True, help='Use LDAP to match logins.')
 @pass_model
-def user_domains(model, csv=False):
+def user_domains(model, csv=False, ldap=False):
     """
     Organization user counts
+
+    If the LDAP lookup is enabled, all users without a known domain to be
+    used to detect their affiliation will be looked up using LDAP and the
+    configured attribute will be used instead.
     """
+
+    if ldap:
+        model.enable_ldap()
 
     orgs = {}
 

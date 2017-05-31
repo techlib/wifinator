@@ -8,3 +8,4 @@ Flask-QRcode
 Flask-WeasyPrint
 click
 tabulate
+ldap3
