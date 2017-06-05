@@ -1,6 +1,8 @@
 #!/usr/bin/python3 -tt
 # -*- coding: utf-8 -*-
 
+import re
+
 from threading import Lock
 from requests import Session, HTTPError
 from time import time
@@ -11,8 +13,10 @@ from requests.packages.urllib3 import disable_warnings
 
 disable_warnings(InsecureRequestWarning)
 
+
 class ArubaError(Exception):
     """Generic error related to communication with Aruba WiFi controllers."""
+
 
 class Aruba(object):
     # <url> ? command @@ timestamp & UIDARUBA=session-id
@@ -37,13 +41,20 @@ class Aruba(object):
         s = self.session.cookies.get('SESSION', '')
         p = '{0}@@{1}&UIDARUBA={2}'.format(command, int(time()), s)
         r = self.session.get(self.command_url, verify=False, params=p)
-        return r.text.encode('utf8', 'xmlcharrefreplace')
 
-    def request_table(self, command):
+        # The controller shamelessly retains ASCII control characters and
+        # some users are able to inject them through their login names.
+        data = re.sub(b'[\x00-\x09\x11-\x12\x14-\x1f]',
+                      lambda m: b'\\x%.2x' % m.group(0)[0],
+                      r.text.encode('utf8', 'xmlcharrefreplace'))
+
         try:
-            r = XML(self.request(command))
+            return XML(data)
         except ParseError:
             raise ArubaError('Response is not a valid XML element')
+
+    def request_table(self, command):
+        r = self.request(command)
 
         if r.find('t') is None:
             raise ArubaError('Response does not contain a table')
@@ -55,7 +66,7 @@ class Aruba(object):
         return {row[0]: row[1] for row in self.request_table(command)}
 
     def login(self):
-        if XML(self.request('show roleinfo')).find('data'):
+        if self.request('show roleinfo').find('data'):
             return
 
         r = self.session.post(self.login_url, verify=False, data={
