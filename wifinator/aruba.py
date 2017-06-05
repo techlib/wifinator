@@ -45,7 +45,7 @@ class Aruba(object):
         # The controller shamelessly retains ASCII control characters and
         # some users are able to inject them through their login names.
         data = re.sub(b'[\x00-\x09\x11-\x12\x14-\x1f]',
-                      lambda m: b'\\x%.2x' % m.group(0)[0],
+                      lambda m: ('\\x%.2x' % m.group(0)[0]).encode('utf8'),
                       r.text.encode('utf8', 'xmlcharrefreplace'))
 
         try:
