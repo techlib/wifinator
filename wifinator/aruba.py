@@ -48,10 +48,11 @@ class Aruba(object):
                       lambda m: ('\\x%.2x' % m.group(0)[0]).encode('utf8'),
                       r.text.encode('utf8', 'xmlcharrefreplace'))
 
-        try:
-            return XML(data)
-        except ParseError:
-            raise ArubaError('Response is not a valid XML element')
+        if data:
+            try:
+                return XML(data)
+            except ParseError:
+                raise ArubaError('Response is not a valid XML element')
 
     def request_table(self, command):
         r = self.request(command)
