@@ -377,7 +377,11 @@ def make_site(db, manager, access_model, debug=False):
                 continue
 
             location = locations.get(station['ap'], 'Unknown')
-            zones[location] += 1
+            try:
+                zones[location] += 1
+            except KeyError:
+                print('AP {} not found in database'.format(location))
+
 
         # Convert devices counts into rounded user counts.
         for zone in list(zones):
