@@ -197,7 +197,8 @@ def make_site(db, manager, access_model, debug=False):
     @authorized_only(privilege='admin')
     def printable(pid):
         profile = manager.db.profile.get(pid)
-        qr_string = "WIFI:S:%s;T:WPA;P:%s" % (profile.ssid, profile.psk)
+        qr_string = f"WIFI:S:{profile.ssid};T:WPA;P:{profile.psk};;"
+
         if profile is None:
             flask.flash('Network disappeared in the meantime.', 'warning')
             return flask.redirect('/')
